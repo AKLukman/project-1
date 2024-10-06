@@ -1,95 +1,144 @@
 import { Schema, model } from 'mongoose'
-import { Guardian, LocalGuardian, Student, UserName } from './student.interface'
+import {
+  StudentModel,
+  TGuardian,
+  TLocalGuardian,
+  TStudent,
+  TUserName,
+} from './student.interface'
 
-const userNameSchema = new Schema<UserName>({
+const userNameSchema = new Schema<TUserName>({
   firstName: {
     type: String,
-    required: true,
+    trim: true,
+    required: [true, 'First name is required'],
+    maxlength: [20, 'First name cannot be more than 20 characters'],
   },
+
   middleName: {
     type: String,
   },
   lastName: {
     type: String,
-    required: true,
+    required: [true, 'Last name is required'],
   },
 })
 
-const gurdianSchema = new Schema<Guardian>({
+const gurdianSchema = new Schema<TGuardian>({
   fatherName: {
     type: String,
-    required: true,
+    required: [true, "Father's name is required"],
   },
   fatherOccupation: {
     type: String,
-    required: true,
+    required: [true, "Father's occupation is required"],
   },
   fatherContactNo: {
     type: String,
-    required: true,
+    required: [true, "Father's contact number is required"],
   },
-  MotherName: {
+  motherName: {
     type: String,
-    required: true,
+    required: [true, "Mother's name is required"],
   },
   motherOccupation: {
     type: String,
-    required: true,
+    required: [true, "Mother's occupation is required"],
   },
   motherContactNo: {
     type: String,
-    required: true,
+    required: [true, "Mother's contact number is required"],
   },
 })
 
-const localGurdianSchema = new Schema<LocalGuardian>({
+const localGurdianSchema = new Schema<TLocalGuardian>({
   name: {
     type: String,
+    required: [true, 'Name is required'],
   },
-  occopation: {
+  occupation: {
     type: String,
+    required: [true, 'Occupation is required'],
   },
   contactNo: {
     type: String,
+    required: [true, 'ContactNo is required'],
   },
   address: {
     type: String,
+    required: [true, 'Address is required'],
   },
 })
 
-const studentSchema = new Schema<Student>({
-  id: { type: String },
-  name: userNameSchema,
-  gender: ['male', 'female'],
+const studentSchema = new Schema<TStudent, StudentModel>({
+  id: {
+    type: String,
+    required: [true, 'Student ID is required'],
+    unique: true,
+  },
+  name: {
+    type: userNameSchema,
+    required: [true, 'Student name is required'],
+  },
+  gender: {
+    type: String,
+    enum: {
+      values: ['male', 'female'],
+      message: '{VALUE} is not valid',
+    },
+    required: [true, 'Gender is required'],
+  },
   dateOfBirth: {
     type: String,
+    required: [true, 'Date of birth is required'],
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email is required'],
+    unique: true,
   },
-  contacNo: {
+  contactNo: {
     type: String,
-    required: true,
+    required: [true, 'Contact number is required'],
   },
   emergencyContactNo: {
     type: String,
-    required: true,
+    required: [true, 'Emergency contact number is required'],
   },
-  bloodGroup: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+  bloodGroup: {
+    type: String,
+    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+  },
   presentAddress: {
     type: String,
-    required: true,
+    required: [true, 'Present address is required'],
   },
   permanentAddress: {
     type: String,
-    required: true,
+    required: [true, 'Permanent address is required'],
   },
-  guardian: gurdianSchema,
-  localGurdian: localGurdianSchema,
+  guardian: {
+    type: gurdianSchema,
+    required: [true, 'Guardian details are required'],
+  },
+  localGuardian: {
+    type: localGurdianSchema,
+    required: [true, 'Local guardian details are required'],
+  },
   profileImage: {
     type: String,
   },
-  isActive: ['active', 'blocked'],
+  isActive: {
+    type: String,
+    enum: ['active', 'blocked'],
+    default: 'active',
+  },
 })
-const Student = model<Student>('Student', studentSchema)
+
+// creating custom static method
+studentSchema.statics.isUserExist = async function (id: string) {
+  const existStudent = Student.findOne({ id })
+  return existStudent
+}
+
+export const Student = model<TStudent, StudentModel>('Student', studentSchema)
