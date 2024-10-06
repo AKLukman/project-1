@@ -47,6 +47,10 @@ const localGuardianSchema = z.object({
 // Zod schema for Student
 const studentValidationSchema = z.object({
   id: z.string().min(1, { message: 'Student ID is required' }),
+  password: z
+    .string()
+    .min(1, { message: 'Password is required' })
+    .max(20, { message: 'Password cannot be more than 20 characters' }),
   name: userNameSchema,
   gender: z.enum(['male', 'female'], {
     errorMap: () => ({ message: 'Gender must be male or female' }),
@@ -71,5 +75,6 @@ const studentValidationSchema = z.object({
   localGuardian: localGuardianSchema,
   profileImage: z.string().optional(),
   isActive: z.enum(['active', 'blocked']).default('active'),
+  isDeleted: z.boolean(),
 })
 export default studentValidationSchema

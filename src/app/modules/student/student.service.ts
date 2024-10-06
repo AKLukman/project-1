@@ -15,7 +15,12 @@ const getStudentsFromDb = async () => {
   return result
 }
 const getAStudent = async (id: string) => {
-  const result = await Student.findOne({ id })
+  // const result = await Student.findOne({ id })
+  const result = await Student.aggregate([{ $match: { id: id } }])
+  return result
+}
+const deleteAStudent = async (id: string) => {
+  const result = await Student.updateOne({ id }, { isDeleted: true })
   return result
 }
 
@@ -23,4 +28,5 @@ export const studentServices = {
   createStudentIntoDb,
   getStudentsFromDb,
   getAStudent,
+  deleteAStudent,
 }
